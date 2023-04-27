@@ -1,13 +1,14 @@
 <template>
   <div class="mb-3">
     <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" :value="inputRef.val" @input="updateValue"
-      @blur="validateInput" :class="{ 'is-invalid': inputRef.error }">
+      @blur="validateInput" :class="{ 'is-invalid': inputRef.error }" v-bind="$attrs">
     <span v-if="inputRef.error" class="invalid-feedback">{{ inputRef.message }}</span>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType } from 'vue'
+import { defineComponent, reactive, PropType, onMounted } from 'vue'
+import { emitter } from './ValidateForm.vue'
 
 const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
@@ -23,7 +24,9 @@ export default defineComponent({
     rules: Array as PropType<RulesProp>,
     modelValue: String
   },
+  inheritAttrs: false,
   setup(props, context) {
+    console.log(context.attrs)
     const inputRef = reactive({
       val: props.modelValue || '',
       error: false,
@@ -53,7 +56,11 @@ export default defineComponent({
         })
         inputRef.error = !allPasswed
       }
+      return true
     }
+    onMounted(() => {
+      emitter.emit('form-item-created', validateInput)
+    })
     return {
       inputRef,
       validateInput,
